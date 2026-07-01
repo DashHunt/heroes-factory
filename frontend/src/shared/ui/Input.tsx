@@ -10,7 +10,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   ref,
 ) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 w-60">
       {label && (
         <label htmlFor={id} className="text-sm font-medium text-neutral-700">
           {label}
