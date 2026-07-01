@@ -21,8 +21,10 @@ vi.mock('../services/hero.api', () => ({
   },
 }))
 
+// Mock de api
 const mockedHeroApi = vi.mocked(heroApi)
 
+// Input e record mockado para criação/atualização de herói
 const heroInput = {
   name: 'Robert Bruce Banner',
   nickname: 'Hulk',
@@ -34,6 +36,7 @@ const heroInput = {
 
 const heroRecord = { id: '1', ...heroInput, is_active: true, created_at: '', updated_at: '' }
 
+// Wrapper para fornecer QueryClientProvider aos hooks
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return function Wrapper({ children }: { children: ReactNode }) {

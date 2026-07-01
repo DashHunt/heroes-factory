@@ -7,10 +7,9 @@ interface PaginationProps {
 export function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
-  // Sempre 2 páginas consecutivas visíveis, menor à esquerda e maior à direita —
-  // a posição dos botões nunca muda, só a janela desliza conforme a página atual.
-  const firsButton = page >= totalPages ? totalPages - 1 : page;
-  const secondButton = firsButton + 1;
+  // Sempre 2 páginas consecutivas visíveis, menor à esquerda e maior à direita
+  const firstButton = page >= totalPages ? totalPages - 1 : page; // Botão a esquerda
+  const secondButton = firstButton + 1; // Botão a direita
 
   function renderPageButton(pageNumber: number) {
     const isActive = pageNumber === page;
@@ -34,8 +33,8 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   }
 
   return (
-    <nav className="flex items-center justify-center gap-2" aria-label="Paginação">
-      {renderPageButton(firsButton)}
+    <nav className="flex items-center justify-end gap-2 mt-10" aria-label="Paginação">
+      {renderPageButton(firstButton)}
       {renderPageButton(secondButton)}
     </nav>
   );

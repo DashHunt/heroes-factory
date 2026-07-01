@@ -1,3 +1,4 @@
+import { Loader2Icon } from 'lucide-react'
 import { Button } from '../Button'
 
 interface ModalActionsProps {
@@ -24,8 +25,14 @@ export function ModalActions({
           <Button type="button" variant="white" className="shadow" onClick={onClose} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" className="shadow" disabled={isSaving}>
-            {isSaving ? 'Salvando...' : saveLabel}
+          <Button
+            type="submit"
+            variant="primary"
+            className="shadow"
+            disabled={isSaving}
+            aria-label={isSaving ? 'Salvando...' : undefined}
+          >
+            {isSaving ? <Loader2Icon className="animate-spin" data-testid="spinner" /> : saveLabel}
           </Button>
         </>
       ) : (

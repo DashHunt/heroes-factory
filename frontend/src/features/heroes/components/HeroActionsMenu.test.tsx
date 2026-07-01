@@ -20,13 +20,15 @@ describe('HeroActionsMenu', () => {
     expect(screen.queryByRole('button', { name: 'Ativar' })).not.toBeInTheDocument()
   })
 
-  it('quando inativo, mostra só Ativar (sem Excluir/Editar)', async () => {
+  it('quando inativo, mostra só o switch de Ativar (sem Excluir/Editar)', async () => {
     const user = userEvent.setup()
     render(<HeroActionsMenu isActive={false} />)
 
     await user.click(screen.getByRole('button', { name: 'Ações' }))
 
-    expect(screen.getByRole('button', { name: 'Ativar' })).toBeInTheDocument()
+    const toggle = screen.getByRole('switch', { name: 'Ativar herói' })
+    expect(toggle).toBeInTheDocument()
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
     expect(screen.queryByRole('button', { name: 'Excluir' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
   })
@@ -43,13 +45,13 @@ describe('HeroActionsMenu', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 
-  it('chama onToggleActive ao clicar em Ativar', async () => {
+  it('chama onToggleActive ao acionar o switch de Ativar', async () => {
     const onToggleActive = vi.fn()
     const user = userEvent.setup()
     render(<HeroActionsMenu isActive={false} onToggleActive={onToggleActive} />)
 
     await user.click(screen.getByRole('button', { name: 'Ações' }))
-    await user.click(screen.getByRole('button', { name: 'Ativar' }))
+    await user.click(screen.getByRole('switch', { name: 'Ativar herói' }))
 
     expect(onToggleActive).toHaveBeenCalledTimes(1)
   })

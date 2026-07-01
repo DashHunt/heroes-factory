@@ -1,5 +1,6 @@
 import { Modal } from './Modal'
 import { Button } from './Button'
+import { Loader2Icon } from 'lucide-react'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -32,8 +33,13 @@ export function ConfirmDialog({
         <Button variant="secondary" onClick={onCancel} disabled={isConfirming}>
           {cancelLabel}
         </Button>
-        <Button variant={variant} onClick={onConfirm} disabled={isConfirming}>
-          {isConfirming ? 'Aguarde...' : confirmLabel}
+        <Button
+          variant={variant}
+          onClick={onConfirm}
+          disabled={isConfirming}
+          aria-label={isConfirming ? 'Aguarde...' : undefined}
+        >
+          {isConfirming ? <Loader2Icon className="animate-spin" data-testid="spinner" /> : confirmLabel}
         </Button>
       </div>
     </Modal>

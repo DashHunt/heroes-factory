@@ -94,6 +94,8 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
             {...register("nickname")}
             error={errors.nickname?.message}
           />
+          <div className='grid grid-cols-2 gap-4'>
+
           <Input
             id="date_of_birth"
             type="date"
@@ -119,7 +121,8 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
             {...register("avatar_url")}
             error={errors.avatar_url?.message}
           />
-
+          </div>
+          
           <ModalActions
             onClose={onClose}
             showSave
