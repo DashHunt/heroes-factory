@@ -5,7 +5,7 @@ import { Spinner } from '../../shared/ui/Spinner'
 import { EmptyState } from '../../shared/ui/EmptyState'
 import { Pagination } from '../../shared/ui/Pagination'
 import { useDebounce } from '../../shared/hooks/useDebounce'
-import { useHeroes, HeroList, HeroSearchInput, HeroFormModal } from '../../features/heroes'
+import { useHeroes, HeroList, HeroSearchInput, HeroFormModal, HeroDetailModal } from '../../features/heroes'
 import type { Hero } from '../../features/heroes'
 
 export function HeroesPage() {
@@ -15,6 +15,9 @@ export function HeroesPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [heroBeingEdited, setHeroBeingEdited] = useState<Hero | undefined>(undefined)
+
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [heroBeingViewed, setHeroBeingViewed] = useState<Hero | undefined>(undefined)
 
   const { data, isPending, isError } = useHeroes({ page, search: debouncedSearch || undefined })
 
@@ -26,6 +29,11 @@ export function HeroesPage() {
   function openEditForm(hero: Hero) {
     setHeroBeingEdited(hero)
     setIsFormOpen(true)
+  }
+
+  function openDetail(hero: Hero) {
+    setHeroBeingViewed(hero)
+    setIsDetailOpen(true)
   }
 
   return (
@@ -67,7 +75,7 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          <HeroList heroes={data.data} onEditHero={openEditForm} onSelectHero={openEditForm}/>
+          <HeroList heroes={data.data} onEditHero={openEditForm} onSelectHero={openDetail} />
           <div className="mt-6">
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>
@@ -78,6 +86,12 @@ export function HeroesPage() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         hero={heroBeingEdited}
+      />
+
+      <HeroDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        hero={heroBeingViewed}
       />
     </PageContainer>
   )

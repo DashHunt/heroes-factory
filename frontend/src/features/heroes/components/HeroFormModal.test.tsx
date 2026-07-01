@@ -98,4 +98,14 @@ describe('HeroFormModal', () => {
     expect(screen.getByText('Não é possível editar um herói inativo.')).toBeInTheDocument()
     expect(screen.queryByLabelText('Nome completo')).not.toBeInTheDocument()
   })
+
+  it('chama onClose ao clicar no X do cabeçalho', async () => {
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+
+    render(<HeroFormModal isOpen onClose={onClose} />)
+    await user.click(screen.getByRole('button', { name: 'Fechar formulário' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })

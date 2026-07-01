@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Modal } from '../../../shared/ui/Modal'
+import { Modal, ModalHeader, ModalActions } from '../../../shared/ui/Modal'
 import { Input } from '../../../shared/ui/Input'
-import { Button } from '../../../shared/ui/Button'
 import { useCreateHero } from '../hooks/useCreateHero'
 import { useUpdateHero } from '../hooks/useUpdateHero'
 import { heroFormSchema, type HeroFormValues } from '../services/hero.schema'
@@ -66,18 +65,16 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel={isEditMode ? 'Editar herói' : 'Criar herói'}>
-      <h2 className="mb-4 text-lg font-semibold text-neutral-900">
-        {isEditMode ? 'Editar herói' : 'Criar herói'}
-      </h2>
+      <ModalHeader
+        title={isEditMode ? 'Editar herói' : 'Criar herói'}
+        onClose={onClose}
+        closeAriaLabel="Fechar formulário"
+      />
 
       {!canEdit ? (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-neutral-600">Não é possível editar um herói inativo.</p>
-          <div className="flex justify-end">
-            <Button type="button" variant="secondary" onClick={onClose}>
-              Fechar
-            </Button>
-          </div>
+          <ModalActions onClose={onClose} />
         </div>
       ) : (
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
@@ -109,14 +106,12 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
             error={errors.avatar_url?.message}
           />
 
-          <div className="mt-2 flex justify-end gap-3">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Salvando...' : isEditMode ? 'Salvar' : 'Criar'}
-            </Button>
-          </div>
+          <ModalActions
+            onClose={onClose}
+            showSave
+            saveLabel={isEditMode ? 'Salvar' : 'Criar'}
+            isSaving={isSubmitting}
+          />
         </form>
       )}
     </Modal>
