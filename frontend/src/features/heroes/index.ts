@@ -1,3 +1,6 @@
+export { HeroList } from './components/HeroList'
+export { HeroSearchInput } from './components/HeroSearchInput'
+
 export { useHeroes } from './hooks/useHeroes'
 export { useHero } from './hooks/useHero'
 export { useCreateHero } from './hooks/useCreateHero'
