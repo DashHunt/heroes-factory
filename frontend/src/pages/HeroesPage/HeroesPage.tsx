@@ -67,7 +67,7 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          <HeroList heroes={data.data} onEditHero={openEditForm} />
+          <HeroList heroes={data.data} onEditHero={openEditForm} onSelectHero={openEditForm}/>
           <div className="mt-6">
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>
