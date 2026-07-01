@@ -9,8 +9,10 @@ vi.mock('../../features/heroes', async (importOriginal) => {
   return {
     ...actual,
     useHeroes: vi.fn(),
-    // Testado à parte em HeroFormModal.test.tsx — aqui só evita depender de QueryClientProvider
+    // Testados à parte nos próprios arquivos — aqui só evita depender de QueryClientProvider
     HeroFormModal: () => null,
+    HeroDeleteConfirmModal: () => null,
+    HeroActivateConfirmModal: () => null,
   }
 })
 

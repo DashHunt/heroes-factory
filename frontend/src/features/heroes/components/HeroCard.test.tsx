@@ -45,7 +45,7 @@ describe('HeroCard', () => {
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  it('repassa onEdit/onDelete/onToggleActive pro HeroActionsMenu', async () => {
+  it('repassa onDelete pro HeroActionsMenu', async () => {
     const onDelete = vi.fn()
     const user = userEvent.setup()
 
@@ -54,5 +54,15 @@ describe('HeroCard', () => {
     await user.click(screen.getByRole('button', { name: 'Excluir' }))
 
     expect(onDelete).toHaveBeenCalledTimes(1)
+  })
+  it('repassa onEdit pro HeroActionsMenu', async () => {
+    const onEdit = vi.fn()
+    const user = userEvent.setup()
+
+    render(<HeroCard hero={hero} onEdit={onEdit} />)
+    await user.click(screen.getByRole('button', { name: 'Ações' }))
+    await user.click(screen.getByRole('button', { name: 'Editar' }))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
   })
 })

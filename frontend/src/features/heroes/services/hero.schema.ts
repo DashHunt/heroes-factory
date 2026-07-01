@@ -1,8 +1,6 @@
 import { z } from 'zod'
 
-// Mesmo schema usado no formulário (react-hook-form + zodResolver) e na criação/edição —
-// os campos editáveis são os mesmos nos dois casos (ver README: modal de edição mostra
-// os mesmos 6 campos do modal de criação).
+// Schema de validação do formulário de herói
 export const heroFormSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   nickname: z.string().min(1, 'Nome de guerra é obrigatório'),

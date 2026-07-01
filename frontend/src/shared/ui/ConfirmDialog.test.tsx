@@ -70,6 +70,7 @@ describe('ConfirmDialog', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Aguarde...' })).toBeDisabled()
+    expect(screen.getByTestId('spinner')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled()
   })
 })

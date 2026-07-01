@@ -1,31 +1,37 @@
-import { useEffect, useRef, useState } from 'react'
-import { MoreVertical, Pencil, ToggleRight, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from "react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Switch } from "../../../shared/ui/Switch";
 
 interface HeroActionsMenuProps {
-  isActive: boolean
-  onEdit?: () => void
-  onDelete?: () => void
-  onToggleActive?: () => void
+  isActive: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onToggleActive?: () => void;
 }
 
 // Ativar substitui Excluir/Editar quando o herói está inativo — não é possível
 // editar um herói desativado (regra de negócio do README).
-export function HeroActionsMenu({ isActive, onEdit, onDelete, onToggleActive }: HeroActionsMenuProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+export function HeroActionsMenu({
+  isActive,
+  onEdit,
+  onDelete,
+  onToggleActive,
+}: HeroActionsMenuProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   return (
     <div ref={containerRef} className="absolute right-0 top-1">
@@ -34,8 +40,8 @@ export function HeroActionsMenu({ isActive, onEdit, onDelete, onToggleActive }: 
         aria-label="Ações"
         aria-expanded={isOpen}
         onClick={(event) => {
-          event.stopPropagation()
-          setIsOpen((current) => !current)
+          event.stopPropagation();
+          setIsOpen((current) => !current);
         }}
         className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-200"
       >
@@ -54,8 +60,8 @@ export function HeroActionsMenu({ isActive, onEdit, onDelete, onToggleActive }: 
                 type="button"
                 aria-label="Excluir"
                 onClick={() => {
-                  onDelete?.()
-                  setIsOpen(false)
+                  onDelete?.();
+                  setIsOpen(false);
                 }}
                 className="text-red-600 hover:text-red-700"
               >
@@ -65,29 +71,34 @@ export function HeroActionsMenu({ isActive, onEdit, onDelete, onToggleActive }: 
                 type="button"
                 aria-label="Editar"
                 onClick={() => {
-                  onEdit?.()
-                  setIsOpen(false)
+                  onEdit?.();
+                  setIsOpen(false);
                 }}
                 className="text-indigo-600 hover:text-indigo-700"
               >
                 <Pencil size={20} />
               </button>
+              <Switch
+                checked={true}
+                label="Desativar héroi"
+                onChange={() => {
+                  onDelete?.();
+                  setIsOpen(false);
+                }}
+              />
             </>
           ) : (
-            <button
-              type="button"
-              aria-label="Ativar"
-              onClick={() => {
-                onToggleActive?.()
-                setIsOpen(false)
+            <Switch
+              checked={false}
+              label="Ativar herói"
+              onChange={() => {
+                onToggleActive?.();
+                setIsOpen(false);
               }}
-              className="text-indigo-600 hover:text-indigo-700"
-            >
-              <ToggleRight size={24} />
-            </button>
+            />
           )}
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -11,6 +11,8 @@ import {
   HeroSearchInput,
   HeroFormModal,
   HeroDetailModal,
+  HeroDeleteConfirmModal,
+  HeroActivateConfirmModal,
 } from "../../features/heroes";
 import type { Hero } from "../../features/heroes";
 
@@ -27,6 +29,14 @@ export function HeroesPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [heroBeingViewed, setHeroBeingViewed] = useState<Hero | undefined>(undefined);
 
+  // Estado para confirmar exclusão (soft delete) do herói
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [heroBeingDeleted, setHeroBeingDeleted] = useState<Hero | undefined>(undefined);
+
+  // Estado para confirmar ativação do herói
+  const [isActivateOpen, setIsActivateOpen] = useState(false);
+  const [heroBeingActivated, setHeroBeingActivated] = useState<Hero | undefined>(undefined);
+
   const { data, isPending, isError } = useHeroes({ page, search: debouncedSearch || undefined });
 
   function openCreateForm() {
@@ -42,6 +52,16 @@ export function HeroesPage() {
   function openDetail(hero: Hero) {
     setHeroBeingViewed(hero);
     setIsDetailOpen(true);
+  }
+
+  function openDelete(hero: Hero) {
+    setHeroBeingDeleted(hero);
+    setIsDeleteOpen(true);
+  }
+
+  function openActivate(hero: Hero) {
+    setHeroBeingActivated(hero);
+    setIsActivateOpen(true);
   }
 
   return (
@@ -88,7 +108,13 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          <HeroList heroes={data.data} onEditHero={openEditForm} onSelectHero={openDetail} />
+          <HeroList
+            heroes={data.data}
+            onEditHero={openEditForm}
+            onSelectHero={openDetail}
+            onDeleteHero={openDelete}
+            onToggleActiveHero={openActivate}
+          />
           <div className="mt-6">
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>
@@ -105,6 +131,18 @@ export function HeroesPage() {
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         hero={heroBeingViewed}
+      />
+
+      <HeroDeleteConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        hero={heroBeingDeleted}
+      />
+
+      <HeroActivateConfirmModal
+        isOpen={isActivateOpen}
+        onClose={() => setIsActivateOpen(false)}
+        hero={heroBeingActivated}
       />
     </PageContainer>
   );

@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       const message = readMessage(query.meta, 'errorMessage')
-      if (message) toast.error(message + error.message)
+      if (message) toast.error(`${message}: ${error.message}`)
     },
   }),
   mutationCache: new MutationCache({
@@ -30,7 +30,7 @@ export const queryClient = new QueryClient({
     },
     onError: (error, _variables, _context, mutation) => {
       const message = readMessage(mutation.meta, 'errorMessage')
-      if (message) toast.error(message + error.message)
+      if (message) toast.error(`${message}: ${error.message}`)
     },
   }),
 })

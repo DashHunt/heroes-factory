@@ -9,7 +9,7 @@ describe('Pagination', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('mostra a página atual desabilitada e a próxima como navegável', () => {
+  it('mostra a página atual habilitada e a próxima como desabilitada', () => {
     render(<Pagination page={1} totalPages={3} onPageChange={vi.fn()} />)
 
     const current = screen.getByRole('button', { name: '1' })
