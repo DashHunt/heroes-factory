@@ -1,44 +1,44 @@
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Modal, ModalHeader, ModalActions } from '../../../shared/ui/Modal'
-import { Input } from '../../../shared/ui/Input'
-import { useCreateHero } from '../hooks/useCreateHero'
-import { useUpdateHero } from '../hooks/useUpdateHero'
-import { heroFormSchema, type HeroFormValues } from '../services/hero.schema'
-import type { Hero } from '../types/hero.types'
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Modal, ModalHeader, ModalActions } from "../../../shared/ui/Modal";
+import { Input } from "../../../shared/ui/Input";
+import { useCreateHero } from "../hooks/useCreateHero";
+import { useUpdateHero } from "../hooks/useUpdateHero";
+import { heroFormSchema, type HeroFormValues } from "../services/hero.schema";
+import type { Hero } from "../types/hero.types";
 
 interface HeroFormModalProps {
-  isOpen: boolean
-  onClose: () => void
-  hero?: Hero
+  isOpen: boolean;
+  onClose: () => void;
+  hero?: Hero;
 }
 
 // O input type="date" espera "YYYY-MM-DD"; o backend devolve "YYYY-MM-DD HH:mm:ss"
 function toDateInputValue(dateOfBirth: string): string {
-  return dateOfBirth.slice(0, 10)
+  return dateOfBirth.slice(0, 10);
 }
 
 function buildDefaultValues(hero?: Hero): HeroFormValues {
   return {
-    name: hero?.name ?? '',
-    nickname: hero?.nickname ?? '',
-    date_of_birth: hero ? toDateInputValue(hero.date_of_birth) : '',
-    universe: hero?.universe ?? '',
-    main_power: hero?.main_power ?? '',
-    avatar_url: hero?.avatar_url ?? '',
-  }
+    name: hero?.name ?? "",
+    nickname: hero?.nickname ?? "",
+    date_of_birth: hero ? toDateInputValue(hero.date_of_birth) : "",
+    universe: hero?.universe ?? "",
+    main_power: hero?.main_power ?? "",
+    avatar_url: hero?.avatar_url ?? "",
+  };
 }
 
 export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
-  const isEditMode = Boolean(hero)
-  // Defesa em profundidade: o menu de ações já esconde "Editar" pra herói inativo,
-  // mas o modal também bloqueia — mesma regra de negócio do backend (HeroInactiveError).
-  const canEdit = !hero || hero.is_active
+  const isEditMode = Boolean(hero);
 
-  const createHero = useCreateHero()
-  const updateHero = useUpdateHero()
-  const isSubmitting = createHero.isPending || updateHero.isPending
+  // Verifica se o herói é ativo para permitir edição
+  const canEdit = !hero || hero.is_active;
+
+  const { isPending: submittingHero, mutate: createHeroMutation } = useCreateHero();
+  const { isPending: submittingUpdate, mutate: updateHero } = useUpdateHero();
+  const isSubmitting = submittingHero || submittingUpdate;
 
   const {
     register,
@@ -48,25 +48,29 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
   } = useForm<HeroFormValues>({
     resolver: zodResolver(heroFormSchema),
     defaultValues: buildDefaultValues(hero),
-  })
+  });
 
   useEffect(() => {
-    if (isOpen) reset(buildDefaultValues(hero))
-  }, [isOpen, hero, reset])
+    if (isOpen) reset(buildDefaultValues(hero));
+  }, [isOpen, hero, reset]);
 
   function onSubmit(values: HeroFormValues) {
     if (isEditMode && hero) {
-      updateHero.mutate({ id: hero.id, data: values }, { onSuccess: onClose })
-      return
+      updateHero({ id: hero.id, data: values }, { onSuccess: onClose });
+      return;
     }
 
-    createHero.mutate(values, { onSuccess: onClose })
+    createHeroMutation(values, { onSuccess: onClose });
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} ariaLabel={isEditMode ? 'Editar herói' : 'Criar herói'}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel={isEditMode ? "Editar herói" : "Criar herói"}
+    >
       <ModalHeader
-        title={isEditMode ? 'Editar herói' : 'Criar herói'}
+        title={isEditMode ? "Editar herói" : "Criar herói"}
         onClose={onClose}
         closeAriaLabel="Fechar formulário"
       />
@@ -78,42 +82,52 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
         </div>
       ) : (
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <Input id="name" label="Nome completo" {...register('name')} error={errors.name?.message} />
+          <Input
+            id="name"
+            label="Nome completo"
+            {...register("name")}
+            error={errors.name?.message}
+          />
           <Input
             id="nickname"
             label="Nome de guerra"
-            {...register('nickname')}
+            {...register("nickname")}
             error={errors.nickname?.message}
           />
           <Input
             id="date_of_birth"
             type="date"
             label="Data de nascimento"
-            {...register('date_of_birth')}
+            {...register("date_of_birth")}
             error={errors.date_of_birth?.message}
           />
-          <Input id="universe" label="Universo" {...register('universe')} error={errors.universe?.message} />
+          <Input
+            id="universe"
+            label="Universo"
+            {...register("universe")}
+            error={errors.universe?.message}
+          />
           <Input
             id="main_power"
             label="Habilidade"
-            {...register('main_power')}
+            {...register("main_power")}
             error={errors.main_power?.message}
           />
           <Input
             id="avatar_url"
             label="Avatar (URL)"
-            {...register('avatar_url')}
+            {...register("avatar_url")}
             error={errors.avatar_url?.message}
           />
 
           <ModalActions
             onClose={onClose}
             showSave
-            saveLabel={isEditMode ? 'Salvar' : 'Criar'}
+            saveLabel={isEditMode ? "Salvar" : "Criar"}
             isSaving={isSubmitting}
           />
         </form>
       )}
     </Modal>
-  )
+  );
 }

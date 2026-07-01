@@ -9,7 +9,9 @@ interface HeroDetailModalProps {
 
 function formatDateOfBirth(dateOfBirth: string): string {
   const [year, month, day] = dateOfBirth.slice(0, 10).split('-')
+
   if (!year || !month || !day) return dateOfBirth
+
   return `${day}/${month}/${year}`
 }
 
