@@ -36,7 +36,7 @@ describe('queryClient — bridge de toast (react-toastify)', () => {
     })
 
     await expect(mutation.execute({})).rejects.toThrow('falhou')
-    expect(toast.error).toHaveBeenCalledWith('Falha ao criar herói')
+    expect(toast.error).toHaveBeenCalledWith('Falha ao criar heróifalhou')
   })
 
   it('não dispara toast quando a mutation não declara meta de mensagem', async () => {

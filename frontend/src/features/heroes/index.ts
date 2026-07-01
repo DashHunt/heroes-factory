@@ -1,5 +1,7 @@
 export { HeroList } from './components/HeroList'
 export { HeroSearchInput } from './components/HeroSearchInput'
+export { HeroFormModal } from './components/HeroFormModal'
+export { HeroDetailModal } from './components/HeroDetailModal'
 
 export { useHeroes } from './hooks/useHeroes'
 export { useHero } from './hooks/useHero'

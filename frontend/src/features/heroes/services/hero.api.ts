@@ -20,7 +20,7 @@ export const heroApi = {
   },
 
   update: async (id: string, data: HeroFormValues): Promise<Hero> => {
-    const response = await httpClient.put<Hero>(`/heroes/${id}`, data)
+    const response = await httpClient.put<Hero>(`/heroes/update/${id}`, data)
     return response.data
   },
 

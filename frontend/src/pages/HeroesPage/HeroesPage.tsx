@@ -1,24 +1,59 @@
-import { useState } from 'react'
-import { PageContainer } from '../../shared/layouts/PageContainer'
-import { Button } from '../../shared/ui/Button'
-import { Spinner } from '../../shared/ui/Spinner'
-import { EmptyState } from '../../shared/ui/EmptyState'
-import { Pagination } from '../../shared/ui/Pagination'
-import { useDebounce } from '../../shared/hooks/useDebounce'
-import { useHeroes, HeroList, HeroSearchInput } from '../../features/heroes'
+import { useState } from "react";
+import { PageContainer } from "../../shared/layouts/PageContainer";
+import { Button } from "../../shared/ui/Button";
+import { Spinner } from "../../shared/ui/Spinner";
+import { EmptyState } from "../../shared/ui/EmptyState";
+import { Pagination } from "../../shared/ui/Pagination";
+import { useDebounce } from "../../shared/hooks/useDebounce";
+import {
+  useHeroes,
+  HeroList,
+  HeroSearchInput,
+  HeroFormModal,
+  HeroDetailModal,
+} from "../../features/heroes";
+import type { Hero } from "../../features/heroes";
 
 export function HeroesPage() {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const debouncedSearch = useDebounce(search)
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
 
-  const { data, isPending, isError } = useHeroes({ page, search: debouncedSearch || undefined })
+  // Estado para abrir modal de edição de hérois
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [heroBeingEdited, setHeroBeingEdited] = useState<Hero | undefined>(undefined);
+
+  // Estado para abrir modal de detalhes do herói
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [heroBeingViewed, setHeroBeingViewed] = useState<Hero | undefined>(undefined);
+
+  const { data, isPending, isError } = useHeroes({ page, search: debouncedSearch || undefined });
+
+  function openCreateForm() {
+    setHeroBeingEdited(undefined);
+    setIsFormOpen(true);
+  }
+
+  function openEditForm(hero: Hero) {
+    setHeroBeingEdited(hero);
+    setIsFormOpen(true);
+  }
+
+  function openDetail(hero: Hero) {
+    setHeroBeingViewed(hero);
+    setIsDetailOpen(true);
+  }
 
   return (
     <PageContainer>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="order-2 sm:order-1">
-          <Button type="button" variant="primary" className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="primary"
+            className="w-full sm:w-auto"
+            onClick={openCreateForm}
+          >
             Criar
           </Button>
         </div>
@@ -26,8 +61,8 @@ export function HeroesPage() {
           <HeroSearchInput
             value={search}
             onChange={(value) => {
-              setSearch(value)
-              setPage(1)
+              setSearch(value);
+              setPage(1);
             }}
             onSearch={() => setPage(1)}
           />
@@ -53,12 +88,24 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          <HeroList heroes={data.data} />
+          <HeroList heroes={data.data} onEditHero={openEditForm} onSelectHero={openDetail} />
           <div className="mt-6">
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>
         </>
       )}
+
+      <HeroFormModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        hero={heroBeingEdited}
+      />
+
+      <HeroDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        hero={heroBeingViewed}
+      />
     </PageContainer>
-  )
+  );
 }

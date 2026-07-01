@@ -6,7 +6,12 @@ import type { Hero } from '../../features/heroes'
 
 vi.mock('../../features/heroes', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../features/heroes')>()
-  return { ...actual, useHeroes: vi.fn() }
+  return {
+    ...actual,
+    useHeroes: vi.fn(),
+    // Testado à parte em HeroFormModal.test.tsx — aqui só evita depender de QueryClientProvider
+    HeroFormModal: () => null,
+  }
 })
 
 const mockedUseHeroes = vi.mocked(useHeroes)

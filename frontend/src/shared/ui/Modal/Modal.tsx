@@ -36,7 +36,7 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
         {children}
       </div>
     </div>

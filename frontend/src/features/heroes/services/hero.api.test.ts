@@ -53,12 +53,12 @@ describe('heroApi', () => {
     expect(mockedHttpClient.post).toHaveBeenCalledWith('/heroes', heroInput)
   })
 
-  it('update() chama PUT /heroes/:id com o payload', async () => {
+  it('update() chama PUT /heroes/update/:id com o payload', async () => {
     mockedHttpClient.put.mockResolvedValue({ data: { id: '1', ...heroInput } })
 
     await heroApi.update('1', heroInput)
 
-    expect(mockedHttpClient.put).toHaveBeenCalledWith('/heroes/1', heroInput)
+    expect(mockedHttpClient.put).toHaveBeenCalledWith('/heroes/update/1', heroInput)
   })
 
   it('deactivate() chama DELETE /heroes/:id', async () => {
