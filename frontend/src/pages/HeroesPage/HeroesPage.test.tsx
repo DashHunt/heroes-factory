@@ -68,6 +68,7 @@ describe('HeroesPage', () => {
     render(<HeroesPage />)
 
     expect(screen.getByText('Hulk')).toBeInTheDocument()
-    expect(screen.getByText('Página 1 de 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '1', current: 'page' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '2' })).toBeInTheDocument()
   })
 })
