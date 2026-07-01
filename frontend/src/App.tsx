@@ -1,8 +1,18 @@
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './shared/query/queryClient'
+import { ToastProvider } from './shared/state/ToastProvider'
+import { AppLayout } from './shared/layouts/AppLayout'
+import { AppRouter } from './shared/router/AppRouter'
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="text-sm text-neutral-500">Heroes Factory</p>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AppLayout>
+          <AppRouter />
+        </AppLayout>
+      </ToastProvider>
+    </QueryClientProvider>
   )
 }
 
