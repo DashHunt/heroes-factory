@@ -60,7 +60,7 @@ export async function heroRoutes(app: FastifyTypedInstance) {
   )
 
   app.put(
-    '/heroes/:id',
+    '/heroes/update/:id',
     {
       schema: {
         tags: ['Heroes'],
