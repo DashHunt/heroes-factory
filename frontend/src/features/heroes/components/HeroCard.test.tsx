@@ -18,12 +18,11 @@ const hero: Hero = {
 }
 
 describe('HeroCard', () => {
-  it('mostra nome, nome de guerra e universo', () => {
+  it('mostra o nome de guerra e o avatar com o nome completo como alt', () => {
     render(<HeroCard hero={hero} />)
 
     expect(screen.getByText('Hulk')).toBeInTheDocument()
-    expect(screen.getByText('Robert Bruce Banner')).toBeInTheDocument()
-    expect(screen.getByText('Marvel')).toBeInTheDocument()
+    expect(screen.getByAltText('Robert Bruce Banner')).toBeInTheDocument()
   })
 
   it('não mostra a marca de "Inativo" quando o herói está ativo', () => {
