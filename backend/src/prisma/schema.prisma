@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Hero {
+  id            String   @id @default(uuid())
+  name          String
+  nickname      String
+  date_of_birth DateTime
+  universe      String
+  main_power    String
+  avatar_url    String
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("heroes")
+}

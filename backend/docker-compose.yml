@@ -1,0 +1,17 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: heroes_factory_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: heroes_factory
+      MYSQL_USER: heroes_user
+      MYSQL_PASSWORD: heroes_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - heroes_db_data:/var/lib/mysql
+
+volumes:
+  heroes_db_data:
