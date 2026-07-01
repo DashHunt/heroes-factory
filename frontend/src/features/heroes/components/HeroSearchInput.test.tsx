@@ -13,4 +13,14 @@ describe('HeroSearchInput', () => {
 
     expect(onChange).toHaveBeenCalledWith('h')
   })
+
+  it('chama onSearch ao clicar no botão Buscar', async () => {
+    const onSearch = vi.fn()
+    const user = userEvent.setup()
+
+    render(<HeroSearchInput value="hulk" onChange={vi.fn()} onSearch={onSearch} />)
+    await user.click(screen.getByRole('button', { name: 'Buscar' }))
+
+    expect(onSearch).toHaveBeenCalledTimes(1)
+  })
 })
