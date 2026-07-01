@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
-import { toastBus } from '../state/toastBus'
+import { toast } from 'react-toastify'
 
 function readMessage(meta: Record<string, unknown> | undefined, key: string): string | undefined {
   const value = meta?.[key]
@@ -20,17 +20,17 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       const message = readMessage(query.meta, 'errorMessage')
-      if (message) toastBus.error(message)
+      if (message) toast.error(message)
     },
   }),
   mutationCache: new MutationCache({
     onSuccess: (_data, _variables, _context, mutation) => {
       const message = readMessage(mutation.meta, 'successMessage')
-      if (message) toastBus.success(message)
+      if (message) toast.success(message)
     },
     onError: (_error, _variables, _context, mutation) => {
       const message = readMessage(mutation.meta, 'errorMessage')
-      if (message) toastBus.error(message)
+      if (message) toast.error(message)
     },
   }),
 })
