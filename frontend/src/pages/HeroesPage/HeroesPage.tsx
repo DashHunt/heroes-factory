@@ -13,6 +13,7 @@ import {
   HeroDetailModal,
   HeroDeleteConfirmModal,
   HeroActivateConfirmModal,
+  HeroActionsContext,
 } from "../../features/heroes";
 import type { Hero } from "../../features/heroes";
 
@@ -108,13 +109,13 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          <HeroList
-            heroes={data.data}
-            onEditHero={openEditForm}
-            onSelectHero={openDetail}
-            onDeleteHero={openDelete}
-            onToggleActiveHero={openActivate}
-          />
+          {/* HeroActionsContext existe só pra HeroCard chamar Editar/Excluir/Ativar
+              sem precisar que HeroList repasse essas props sem usá-las (ver
+              features/heroes/context/HeroActionsContext.ts). Os modais continuam
+              todos aqui embaixo, como sempre — o Context só carrega as funções de abrir. */}
+          <HeroActionsContext.Provider value={{ openEdit: openEditForm, openDelete, openActivate }}>
+            <HeroList heroes={data.data} onSelectHero={openDetail} />
+          </HeroActionsContext.Provider>
           <div className="mt-6">
             <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
           </div>

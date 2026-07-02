@@ -1,15 +1,17 @@
 import type { Hero } from "../types/hero.types";
 import { HeroActionsMenu } from "./HeroActionsMenu";
+import { useHeroActions } from "../context/HeroActionsContext";
 
 interface HeroCardProps {
   hero: Hero;
   onClick?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onToggleActive?: () => void;
 }
 
-export function HeroCard({ hero, onClick, onEdit, onDelete, onToggleActive }: HeroCardProps) {
+export function HeroCard({ hero, onClick }: HeroCardProps) {
+  // Editar/Excluir/Ativar vêm do Context (evita repassar props por HeroList
+  // sem uso nenhum aqui) — só o clique no card (abrir detalhe) continua vindo de fora.
+  const { openEdit, openDelete, openActivate } = useHeroActions();
+
   return (
     <div
       className={`relative flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors ${
@@ -20,9 +22,9 @@ export function HeroCard({ hero, onClick, onEdit, onDelete, onToggleActive }: He
     >
       <HeroActionsMenu
         isActive={hero.is_active}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onToggleActive={onToggleActive}
+        onEdit={() => openEdit(hero)}
+        onDelete={() => openDelete(hero)}
+        onToggleActive={() => openActivate(hero)}
       />
 
       <button

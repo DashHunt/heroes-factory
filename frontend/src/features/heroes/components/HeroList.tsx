@@ -4,19 +4,13 @@ import { HeroCard } from './HeroCard'
 interface HeroListProps {
   heroes: Hero[]
   onSelectHero?: (hero: Hero) => void
-  onEditHero?: (hero: Hero) => void
-  onDeleteHero?: (hero: Hero) => void
-  onToggleActiveHero?: (hero: Hero) => void
 }
 
-// 5 por linha em telas grandes, conforme o requisito do README
-export function HeroList({
-  heroes,
-  onSelectHero,
-  onEditHero,
-  onDeleteHero,
-  onToggleActiveHero,
-}: HeroListProps) {
+// Editar/Excluir/Ativar não passam mais por aqui como props — HeroCard
+// pega isso direto do HeroActionsContext (ver ../context/HeroActionsContext.ts).
+// onSelectHero continua vindo de fora porque é o único caso que o HeroCard usa
+// de verdade (no seu próprio onClick), não é só repasse.
+export function HeroList({ heroes, onSelectHero }: HeroListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {heroes.map((hero) => (
@@ -24,9 +18,6 @@ export function HeroList({
           key={hero.id}
           hero={hero}
           onClick={onSelectHero ? () => onSelectHero(hero) : undefined}
-          onEdit={onEditHero ? () => onEditHero(hero) : undefined}
-          onDelete={onDeleteHero ? () => onDeleteHero(hero) : undefined}
-          onToggleActive={onToggleActiveHero ? () => onToggleActiveHero(hero) : undefined}
         />
       ))}
     </div>

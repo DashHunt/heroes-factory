@@ -5,6 +5,8 @@ export { HeroDetailModal } from './components/HeroDetailModal'
 export { HeroDeleteConfirmModal } from './components/HeroDeleteConfirmModal'
 export { HeroActivateConfirmModal } from './components/HeroActivateConfirmModal'
 
+export { HeroActionsContext, useHeroActions } from './context/HeroActionsContext'
+
 export { useHeroes } from './hooks/useHeroes'
 export { useHero } from './hooks/useHero'
 export { useCreateHero } from './hooks/useCreateHero'
