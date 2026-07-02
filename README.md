@@ -84,9 +84,9 @@ npm run test
 
 ### De onde veio, e por que mudou
 
-O backend passou por duas fases de design, ambas documentadas no repositório (`backend-architeture.md` e `backend-evolution-spec.md`): a primeira propunha camadas explícitas (`domain/` + `application/` + `infrastructure/`, com uma entidade `Hero`, um `HeroRepository` e seis classes de use-case). Na prática, ao comparar esse desenho com um projeto irmão real do mesmo autor (mesma stack, mesmo estilo Fastify+Prisma), ficou claro que aquilo era mais cerimônia do que o escopo — uma única entidade — justificava.
+O backend passou por duas fases de design, ambas documentadas no repositório (`backend-architeture.md` e `backend-evolution-spec.md`): a primeira propunha camadas explícitas (`domain/` + `application/` + `infrastructure/`, com uma entidade `Hero`, um `HeroRepository` e seis classes de use-case). Na prática, ao comparar esse desenho outras opções e possibilidades ficou claro que aquilo era mais cerimônia do que o escopo (uma única entidade).
 
-O resultado final é **feature-first e propositalmente enxuto**: tudo relacionado a herói mora em `features/hero/`, a camada é sinalizada pelo **sufixo do nome do arquivo** (estilo NestJS/módulos), não por uma árvore de pastas, e a lógica de negócio/acesso a dado vira **funções**, não classes — sem entidade, sem repository, sem use-cases isolados.
+O resultado final é **feature-first e propositalmente enxuto, mas escalável verticalmente**: tudo relacionado a herói mora em `features/hero/`, a camada é sinalizada pelo **sufixo do nome do arquivo** (módulos), não por uma árvore de pastas, e a lógica de negócio/acesso a dado viram **funções**.
 
 ```
 backend/src/
@@ -119,19 +119,19 @@ backend/src/
 
 ### Decisões
 
-**Sem classe de entidade, repository ou use-case.** `hero.model.ts` é um conjunto de funções exportadas que chamam `prisma.hero.*` diretamente. Não existe uma interface de repository com múltiplas implementações porque o projeto tem uma única fonte de dado (MySQL via Prisma) e nenhuma previsão real de trocar — a abstração existiria só pra parecer "arquitetura", sem resolver problema nenhum. Trade-off aceito conscientemente: os testes unitários mockam o client do Prisma diretamente (via `jest.mock`), em vez de injetar uma implementação fake via interface — mais pragmático, menos "puro" do ponto de vista de Clean Architecture, suficiente pro escopo.
+**Sem classe de entidade, repository ou use-case.** `hero.model.ts` é um conjunto de funções exportadas que chamam `prisma.hero.*` diretamente. Não existe uma interface de repository com múltiplas implementações porque o projeto tem uma única fonte de dado (MySQL via Prisma) e nenhuma previsão real de trocar, a abstração existiria só pra parecer "arquitetura", sem resolver problema nenhum. Trade-off aceito conscientemente: os testes unitários mockam o client do Prisma diretamente (via `jest.mock`), em vez de injetar uma implementação fake via interface. Mais pragmático, menos "puro" do ponto de vista de Clean Architecture, suficiente pro escopo.
 
-**Validação em duas camadas.** O Zod valida formato na borda HTTP — declarado direto no `schema` de cada rota (`hero.routes.ts`), validado automaticamente pelo `fastify-type-provider-zod` antes do handler rodar (nada de `.parse()` manual espalhado pelo controller). `validateHero()` (em `hero.validators.ts`) valida invariantes de domínio na criação/atualização, independente de como o dado chegou ali — a mesma regra ("nome obrigatório", por exemplo) é checada duas vezes de propósito, porque as duas validações têm propósitos diferentes: uma é sobre formato de entrada, a outra sobre integridade do dado.
+**Validação em duas camadas.** O Zod valida formato na borda HTTP, declarado direto no `schema` de cada rota (`hero.routes.ts`), validado automaticamente pelo `fastify-type-provider-zod` antes do handler rodar (nada de `.parse()` manual espalhado pelo controller). `validateHero()` (em `hero.validators.ts`) valida invariantes de domínio na criação/atualização, independente de como o dado chegou ali com a mesma regra ("nome obrigatório", por exemplo) é checada duas vezes de propósito, porque as duas validações têm propósitos diferentes: uma é sobre formato de entrada, a outra sobre integridade do dado.
 
-**`canBeEdited()` como guarda de negócio isolada.** Em vez de espalhar `if (!hero.is_active) throw ...` em todo lugar que edita um herói, existe uma função só (`canBeEdited(hero)`) que expressa essa regra, testada isoladamente e reaproveitada tanto no backend quanto — via replicação intencional — na UI do frontend (o formulário de edição já bloqueia visualmente antes mesmo de chamar a API).
+**`canBeEdited()` como guarda de negócio isolada.** Em vez de espalhar `if (!hero.is_active) throw ...` em todo lugar que edita um herói, existe uma função só (`canBeEdited(hero)`) que expressa essa regra, testada isoladamente e reaproveitada tanto no backend quanto (via replicação intencional) na UI do frontend (o formulário de edição já bloqueia visualmente antes mesmo de chamar a API).
 
 **Timestamps vêm do Prisma, não da aplicação.** `created_at`/`updated_at` são gerados pelo `@default(now())` e `@updatedAt` do schema Prisma — as funções de `hero.model.ts` nunca setam essas datas manualmente, e sempre retornam a linha que o Prisma efetivamente gravou. Isso elimina uma classe inteira de bug (relógio da aplicação divergindo do banco, ou esquecer de atualizar `updated_at` num fluxo novo).
 
-**Soft delete.** O botão "Excluir" da UI não faz um `DELETE` físico — ele seta `is_active = false` (mesma operação usada por "Desativar"), porque o próprio fluxo de negócio permite reativar um herói excluído. Um hard delete tornaria isso impossível sem recriar o registro do zero.
+**Soft delete.** O botão "Excluir" da UI não faz um `DELETE` físico, ele seta `is_active = false` (mesma operação usada por "Desativar"), porque o próprio fluxo de negócio permite reativar um herói excluído. Um hard delete tornaria isso impossível sem recriar o registro do zero.
 
 **Erros de domínio + `errorHandler` central.** `HeroNotFoundError` (404), `HeroInactiveError` (410 — o recurso existe mas não está mais disponível pra edição), `HeroValidationError` (400) e erros de validação do Zod (400, com `issues` detalhado) são todos mapeados num único `setErrorHandler`, em vez de `try/catch` repetido em cada rota.
 
-**Swagger real, gerado a partir dos mesmos schemas Zod.** Cada rota declara `body`/`params`/`querystring`/`response` com os schemas Zod já usados pra validação — o `fastify-type-provider-zod` transforma isso em OpenAPI automaticamente. Não existe uma segunda fonte de verdade (spec YAML escrita à mão) que possa divergir do código.
+**Swagger real, gerado a partir dos mesmos schemas Zod.** Cada rota declara `body`/`params`/`querystring`/`response` com os schemas Zod já usados pra validação o `fastify-type-provider-zod` transforma isso em OpenAPI automaticamente. Não existe uma segunda fonte de verdade (spec YAML escrita à mão) que possa divergir do código.
 
 ## Arquitetura — Frontend
 
@@ -177,21 +177,21 @@ frontend/src/
 
 **TanStack Query em toda chamada de servidor.** Nenhum dado vindo da API passa por `useState` + `useEffect` manual — todos os 6 hooks (`useHeroes`, `useCreateHero`, etc.) usam `useQuery`/`useMutation`, o que já resolve de graça o requisito de loading (`isPending`) e invalidação automática de cache após criar/editar/excluir/ativar.
 
-**Toast disparado a partir do próprio `queryClient`, não de cada hook.** Cada `useQuery`/`useMutation` declara `meta: { successMessage, errorMessage }`; um `QueryCache`/`MutationCache` central (em `shared/query/queryClient.ts`) lê esse `meta` e chama `toast.success`/`toast.error` (react-toastify). Isso evita repetir `onSuccess`/`onError` com toast manual em cada um dos 6 hooks — o requisito "toda ação assíncrona tem mensagem de sucesso/erro" vira uma regra só, num lugar só.
+**Toast disparado a partir do próprio `queryClient`, não de cada hook.** Cada `useQuery`/`useMutation` declara `meta: { successMessage, errorMessage }`; um `QueryCache`/`MutationCache` central (em `shared/query/queryClient.ts`) lê esse `meta` e chama `toast.success`/`toast.error` (react-toastify). Isso evita repetir `onSuccess`/`onError` com toast manual em cada um dos 6 hooks, com isso, toda ação assíncrona tem sua mensagem de erro ou sucesso.
 
-**Zod compartilhado entre formulário e tipagem.** `hero.schema.ts` define um único schema (`heroFormSchema`), usado tanto pelo `react-hook-form` (via `zodResolver`) quanto como fonte do tipo TypeScript do formulário (`z.infer`) — evita manter schema de validação e interface de tipos como duas fontes de verdade que podem divergir.
+**Zod compartilhado entre formulário e tipagem.** `hero.schema.ts` define um único schema (`heroFormSchema`), usado tanto pelo `react-hook-form` (via `zodResolver`) quanto como fonte do tipo TypeScript do formulário (`z.infer`) e evita manter schema de validação e interface de tipos como duas fontes de verdade que podem divergir.
 
-**`canBeEdited` replicado na UI (defesa em profundidade).** O `HeroFormModal` verifica `hero.is_active` antes de renderizar o formulário de edição e mostra um aviso em vez de permitir a tentativa — mesmo que o backend já rejeite essa edição com `410`. A UI não devia depender só do backend recusar; a mesma regra de negócio é reforçada nos dois lados.
+**`canBeEdited` replicado na UI (defesa em profundidade).** O `HeroFormModal` verifica `hero.is_active` antes de renderizar o formulário de edição e mostra um aviso em vez de permitir a tentativa. Mesmo que o backend já rejeite essa edição com `410`, é importante que a UI não dependa só do backend e que a mesma regra de negócio seja reforçada nos dois lados.
 
-**`HeroActionsContext` — Context pontual pra resolver um prop drilling real.** Durante o desenvolvimento, `HeroList` e `HeroCard` estavam repassando `onEdit`/`onDelete`/`onToggleActive` de `HeroesPage` até `HeroActionsMenu` sem nunca usar esses callbacks — puro repasse por 3 arquivos. A solução foi um Context **escopado à feature `heroes`** (não um estado global de app) carregando só as funções de abrir cada ação (`openEdit`, `openDelete`, `openActivate`) — nenhum dado, nenhum estado de "qual modal está aberto". Quem guarda esse estado e renderiza os modais continua sendo só `HeroesPage`, exatamente como antes; o Context existe apenas pra `HeroCard`/`HeroActionsMenu` acionarem essas funções sem que `HeroList` precise saber que elas existem.
+**`HeroActionsContext` — Context pontual pra resolver um prop drilling real.** Durante o desenvolvimento, `HeroList` e `HeroCard` estavam repassando `onEdit`/`onDelete`/`onToggleActive` de `HeroesPage` até `HeroActionsMenu` sem nunca usar esses callbacks, puro repasse por 3 arquivos. A solução foi um Context **escopado à feature `heroes`** (não um estado global de app) carregando só as funções de abrir cada ação (`openEdit`, `openDelete`, `openActivate`), nenhum dado, nenhum estado de "qual modal está aberto". Quem guarda esse estado e renderiza os modais continua sendo só `HeroesPage`. O Context existe apenas pra `HeroActionsMenu` acionarem essas funções sem que `HeroList` e `HeroCard` precise saber que elas existem.
 
-**`HeroConfirmationModal` — duas telas quase idênticas viraram uma.** As confirmações de "Excluir" e "Ativar" tinham a mesma estrutura (`ConfirmDialog` + uma mutation + `onConfirm={() => mutate(hero.id, { onSuccess: onClose })}`), diferindo só no hook chamado e no texto/cor do botão. Viraram um componente único com uma prop `action: 'delete' | 'activate'` e um mapa de configuração (`título`/`label`/`variant`/`descrição`) por ação — os dois hooks de mutation são sempre instanciados (regra de hooks do React não permite chamada condicional), mas só o da ação atual é de fato usado.
+**`HeroConfirmationModal` — duas telas quase idênticas viraram uma.** As confirmações de "Excluir" e "Ativar" tinham a mesma estrutura (`ConfirmDialog` + uma mutation + `onConfirm={() => mutate(hero.id, { onSuccess: onClose })}`), diferindo só no hook chamado e no texto/cor do botão. Viraram um componente único com uma variante `action: 'delete' | 'activate'` e um mapa de configuração (`título`/`label`/`variant`/`descrição`) por ação. Os dois hooks de mutation são sempre instanciados (regra de hooks do React não permite chamada condicional), mas só o da ação atual é de fato usado.
 
 **Família `Modal`/`ModalHeader`/`ModalActions`.** O mesmo padrão de cabeçalho (título + X) e rodapé (ações com borda separando do conteúdo) se repetia em `HeroFormModal`, `HeroDetailModal` e `ConfirmDialog` — foi extraído pra `shared/ui/Modal/`, com `ModalActions` aceitando uma prop `showSave` pra alternar entre "Cancelar + Salvar" (formulário) e só "Fechar" (leitura).
 
 ## Design Patterns aplicados
 
-| Pattern | Onde | Papel |
+| Pattern | Exemplos de onde | Papel |
 |---|---|---|
 | **Provider / Context** | `HeroActionsContext` (frontend) | Distribui as funções de abrir ação sem acoplar `HeroList`/`HeroCard` a elas |
 | **Strategy (via mapa de configuração)** | `HeroConfirmationModal` (`CONFIG` por `action`), `HeroActionsMenu` (ativo vs. inativo) | Troca de comportamento/aparência por um parâmetro, sem `if/else` espalhado |
@@ -202,7 +202,7 @@ frontend/src/
 
 ## SOLID na prática
 
-| Princípio | Como aparece aqui |
+| Princípio | Exemplos de como aparece aqui |
 |---|---|
 | **S** — Single Responsibility | Cada função de `hero.model.ts` faz uma operação só; cada componente React faz uma coisa (`HeroCard` só exibe, `HeroSearchInput` só captura busca) |
 | **O** — Open/Closed | `shared/ui/Button` ganha variantes via prop (`variant="danger"`), sem precisar editar o componente pra cada novo caso de uso |
@@ -224,11 +224,11 @@ Regra prática usada pra decidir o que vira teste de integração: se o bug só 
 
 ## Fluxo de trabalho (git)
 
-O histórico deste repositório foi construído de propósito pra ser legível: um commit inicial "limpo" (só scaffold + tooling, nada de código de domínio) inicializando o repositório, seguido de branches por camada técnica — não por tela inteira — cada uma mergeada só depois de testes passando:
+O histórico deste repositório foi construído de propósito pra ser legível: um commit inicial "limpo" (só scaffold + tooling, nada de código de domínio) inicializando o repositório, seguido de branches por camada técnica ou por feature ajustado, cada uma mergeada só depois de testes passando:
 
 `frontend-scaffold` → `frontend-shell` → `heroes-data-layer` → `heroes-list` → `heroes-form` → `cors-fix` → `pagination-fix` → `heroes-lifecycle` → `hero-actions-context`
 
-Convenção de commit usada em todo o histórico: `Heroes Factory - <FEATURE> - <comentário>`.
+Convenção de commit usada em todo o histórico: `Heroes Factory - <FEATURE> - <comentário detalhado do que foi desenvolvido>`.
 
 ## Decisões e trade-offs — referência rápida
 
@@ -249,6 +249,6 @@ Convenção de commit usada em todo o histórico: `Heroes Factory - <FEATURE> - 
 
 - **Lint contra import direto dentro de uma feature** (`eslint-plugin-import` com `no-restricted-imports`), pra garantir que ninguém importe `features/heroes/components/HeroCard` fora do barrel `features/heroes/index.ts`.
 - **Migrations formais do Prisma** (`prisma migrate`) em vez de `db push` — hoje o schema é aplicado direto, sem histórico versionado de alterações.
-- **CI** (GitHub Actions) rodando lint + testes + build a cada PR, em vez de só localmente.
+- **CI** (GitHub Actions) rodando lint + testes + build a cada PR.
 - **Testes E2E** (Playwright/Cypress) cobrindo o fluxo completo (criar → listar → editar → excluir → reativar) num navegador real.
-- **Autenticação**, caso o escopo deixe de ser interno/demo — hoje intencionalmente fora do escopo do desafio.
+- **Autenticação**
