@@ -2,7 +2,7 @@
 
 CRUD de heróis fullstack — Node.js/Fastify + React + MySQL — construído como resposta a um desafio técnico, com foco em REST, SOLID, Design Patterns, testes automatizados e decisões de arquitetura conscientes (e documentadas).
 
-Este README cobre **como rodar o projeto**, **o que foi construído**, **por que foi construído desse jeito** e **o que ficaria como próximo passo**. As especificações de negócio originais estão em [`DOCUMENTATION.md`](./DOCUMENTATION.md).
+Este README cobre **como rodar o projeto**, **o que foi construído**, **por que foi construído desse jeito** e **o que ficaria como próximo passo**.
 
 ## Sumário
 
