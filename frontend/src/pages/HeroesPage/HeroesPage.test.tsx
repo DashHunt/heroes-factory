@@ -11,8 +11,7 @@ vi.mock('../../features/heroes', async (importOriginal) => {
     useHeroes: vi.fn(),
     // Testados à parte nos próprios arquivos — aqui só evita depender de QueryClientProvider
     HeroFormModal: () => null,
-    HeroDeleteConfirmModal: () => null,
-    HeroActivateConfirmModal: () => null,
+    HeroConfirmationModal: () => null,
   }
 })
 

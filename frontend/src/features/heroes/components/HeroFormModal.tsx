@@ -56,8 +56,7 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
 
   function onSubmit(values: HeroFormValues) {
     if (isEditMode && hero) {
-      updateHero({ id: hero.id, data: values }, { onSuccess: onClose });
-      return;
+      return updateHero({ id: hero.id, data: values }, { onSuccess: onClose });
     }
 
     createHeroMutation(values, { onSuccess: onClose });
@@ -122,7 +121,7 @@ export function HeroFormModal({ isOpen, onClose, hero }: HeroFormModalProps) {
             error={errors.avatar_url?.message}
           />
           </div>
-          
+
           <ModalActions
             onClose={onClose}
             showSave

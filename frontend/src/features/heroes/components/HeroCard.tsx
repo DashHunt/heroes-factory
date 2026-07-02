@@ -4,12 +4,9 @@ import { HeroActionsMenu } from "./HeroActionsMenu";
 interface HeroCardProps {
   hero: Hero;
   onClick?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onToggleActive?: () => void;
 }
 
-export function HeroCard({ hero, onClick, onEdit, onDelete, onToggleActive }: HeroCardProps) {
+export function HeroCard({ hero, onClick }: HeroCardProps) {
   return (
     <div
       className={`relative flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors ${
@@ -18,12 +15,7 @@ export function HeroCard({ hero, onClick, onEdit, onDelete, onToggleActive }: He
           : "border-neutral-200 bg-neutral-100 grayscale"
       }`}
     >
-      <HeroActionsMenu
-        isActive={hero.is_active}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onToggleActive={onToggleActive}
-      />
+      <HeroActionsMenu hero={hero} isActive={hero.is_active} />
 
       <button
         type="button"

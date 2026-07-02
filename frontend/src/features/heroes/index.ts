@@ -2,8 +2,10 @@ export { HeroList } from './components/HeroList'
 export { HeroSearchInput } from './components/HeroSearchInput'
 export { HeroFormModal } from './components/HeroFormModal'
 export { HeroDetailModal } from './components/HeroDetailModal'
-export { HeroDeleteConfirmModal } from './components/HeroDeleteConfirmModal'
-export { HeroActivateConfirmModal } from './components/HeroActivateConfirmModal'
+export { HeroConfirmationModal } from './components/HeroConfirmationModal'
+export type { HeroConfirmationAction } from './components/HeroConfirmationModal'
+
+export { HeroActionsContext, useHeroActions } from './context/HeroActionsContext'
 
 export { useHeroes } from './hooks/useHeroes'
 export { useHero } from './hooks/useHero'

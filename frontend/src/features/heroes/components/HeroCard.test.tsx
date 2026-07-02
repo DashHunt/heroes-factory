@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { HeroCard } from './HeroCard'
+import { HeroActionsContext, type HeroActionsContextValue } from '../context/HeroActionsContext'
 import type { Hero } from '../types/hero.types'
 
 const hero: Hero = {
@@ -17,9 +18,29 @@ const hero: Hero = {
   updated_at: '2024-01-01 00:00:00',
 }
 
+// HeroCard chama openEdit/openDelete/openActivate via useHeroActions(), então todo
+// teste precisa renderizar dentro de um HeroActionsContext.Provider (ver
+// features/heroes/context/HeroActionsContext.ts).
+function renderHeroCard(onClick?: () => void, actions: Partial<HeroActionsContextValue> = {}) {
+  const value: HeroActionsContextValue = {
+    openEdit: vi.fn(),
+    openDelete: vi.fn(),
+    openActivate: vi.fn(),
+    ...actions,
+  }
+
+  render(
+    <HeroActionsContext.Provider value={value}>
+      <HeroCard hero={hero} onClick={onClick} />
+    </HeroActionsContext.Provider>,
+  )
+
+  return value
+}
+
 describe('HeroCard', () => {
   it('mostra o nome de guerra e o avatar com o nome completo como alt', () => {
-    render(<HeroCard hero={hero} />)
+    renderHeroCard()
 
     expect(screen.getByText('Hulk')).toBeInTheDocument()
     expect(screen.getByAltText('Robert Bruce Banner')).toBeInTheDocument()
@@ -29,7 +50,7 @@ describe('HeroCard', () => {
     const onClick = vi.fn()
     const user = userEvent.setup()
 
-    render(<HeroCard hero={hero} onClick={onClick} />)
+    renderHeroCard(onClick)
     await user.click(screen.getByRole('button', { name: /Hulk/ }))
 
     expect(onClick).toHaveBeenCalledTimes(1)
@@ -39,30 +60,31 @@ describe('HeroCard', () => {
     const onClick = vi.fn()
     const user = userEvent.setup()
 
-    render(<HeroCard hero={hero} onClick={onClick} />)
+    renderHeroCard(onClick)
     await user.click(screen.getByRole('button', { name: 'Ações' }))
 
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  it('repassa onDelete pro HeroActionsMenu', async () => {
-    const onDelete = vi.fn()
+  it('chama openDelete(hero) do context ao clicar em Excluir', async () => {
     const user = userEvent.setup()
+    const openDelete = vi.fn()
 
-    render(<HeroCard hero={hero} onDelete={onDelete} />)
+    renderHeroCard(undefined, { openDelete })
     await user.click(screen.getByRole('button', { name: 'Ações' }))
     await user.click(screen.getByRole('button', { name: 'Excluir' }))
 
-    expect(onDelete).toHaveBeenCalledTimes(1)
+    expect(openDelete).toHaveBeenCalledWith(hero)
   })
-  it('repassa onEdit pro HeroActionsMenu', async () => {
-    const onEdit = vi.fn()
-    const user = userEvent.setup()
 
-    render(<HeroCard hero={hero} onEdit={onEdit} />)
+  it('chama openEdit(hero) do context ao clicar em Editar', async () => {
+    const user = userEvent.setup()
+    const openEdit = vi.fn()
+
+    renderHeroCard(undefined, { openEdit })
     await user.click(screen.getByRole('button', { name: 'Ações' }))
     await user.click(screen.getByRole('button', { name: 'Editar' }))
 
-    expect(onEdit).toHaveBeenCalledTimes(1)
+    expect(openEdit).toHaveBeenCalledWith(hero)
   })
 })
