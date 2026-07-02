@@ -11,11 +11,17 @@ import {
   HeroSearchInput,
   HeroFormModal,
   HeroDetailModal,
-  HeroDeleteConfirmModal,
-  HeroActivateConfirmModal,
+  HeroConfirmationModal,
   HeroActionsContext,
 } from "../../features/heroes";
-import type { Hero } from "../../features/heroes";
+import type { Hero, HeroConfirmationAction } from "../../features/heroes";
+
+// Excluir e ativar usam o mesmo HeroConfirmationModal (só muda a "action"),
+// então guardam um estado só em vez de um par isOpen/hero pra cada um.
+interface PendingLifecycleAction {
+  type: HeroConfirmationAction;
+  hero: Hero;
+}
 
 export function HeroesPage() {
   const [page, setPage] = useState(1);
@@ -30,13 +36,8 @@ export function HeroesPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [heroBeingViewed, setHeroBeingViewed] = useState<Hero | undefined>(undefined);
 
-  // Estado para confirmar exclusão (soft delete) do herói
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [heroBeingDeleted, setHeroBeingDeleted] = useState<Hero | undefined>(undefined);
-
-  // Estado para confirmar ativação do herói
-  const [isActivateOpen, setIsActivateOpen] = useState(false);
-  const [heroBeingActivated, setHeroBeingActivated] = useState<Hero | undefined>(undefined);
+  // Estado para confirmar exclusão (soft delete) ou ativação do herói
+  const [pendingAction, setPendingAction] = useState<PendingLifecycleAction | null>(null);
 
   const { data, isPending, isError } = useHeroes({ page, search: debouncedSearch || undefined });
 
@@ -56,13 +57,11 @@ export function HeroesPage() {
   }
 
   function openDelete(hero: Hero) {
-    setHeroBeingDeleted(hero);
-    setIsDeleteOpen(true);
+    setPendingAction({ type: "delete", hero });
   }
 
   function openActivate(hero: Hero) {
-    setHeroBeingActivated(hero);
-    setIsActivateOpen(true);
+    setPendingAction({ type: "activate", hero });
   }
 
   return (
@@ -109,10 +108,7 @@ export function HeroesPage() {
 
       {!isPending && !isError && data && data.data.length > 0 && (
         <>
-          {/* HeroActionsContext existe só pra HeroCard chamar Editar/Excluir/Ativar
-              sem precisar que HeroList repasse essas props sem usá-las (ver
-              features/heroes/context/HeroActionsContext.ts). Os modais continuam
-              todos aqui embaixo, como sempre — o Context só carrega as funções de abrir. */}
+          {/* Context para remover prop drilling de Editar/Excluir/Ativar por HeroList/HeroCard */}
           <HeroActionsContext.Provider value={{ openEdit: openEditForm, openDelete, openActivate }}>
             <HeroList heroes={data.data} onSelectHero={openDetail} />
           </HeroActionsContext.Provider>
@@ -134,16 +130,11 @@ export function HeroesPage() {
         hero={heroBeingViewed}
       />
 
-      <HeroDeleteConfirmModal
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        hero={heroBeingDeleted}
-      />
-
-      <HeroActivateConfirmModal
-        isOpen={isActivateOpen}
-        onClose={() => setIsActivateOpen(false)}
-        hero={heroBeingActivated}
+      <HeroConfirmationModal
+        isOpen={pendingAction !== null}
+        action={pendingAction?.type ?? "delete"}
+        hero={pendingAction?.hero}
+        onClose={() => setPendingAction(null)}
       />
     </PageContainer>
   );

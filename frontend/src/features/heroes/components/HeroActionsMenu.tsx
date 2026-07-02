@@ -1,24 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Switch } from "../../../shared/ui/Switch";
+import type { Hero } from "../types/hero.types";
+import { useHeroActions } from "../context/HeroActionsContext";
 
 interface HeroActionsMenuProps {
+  hero: Hero;
   isActive: boolean;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onToggleActive?: () => void;
 }
 
-// Ativar substitui Excluir/Editar quando o herói está inativo — não é possível
-// editar um herói desativado (regra de negócio do README).
-export function HeroActionsMenu({
-  isActive,
-  onEdit,
-  onDelete,
-  onToggleActive,
-}: HeroActionsMenuProps) {
+// Ativar substitui Excluir/Editar do menu de tres pontinhos quando o herói está inativo
+export function HeroActionsMenu({ hero, isActive }: HeroActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // funções de abrir modal Editar/Excluir/Ativar vêm do Context
+  const { openEdit, openDelete, openActivate } = useHeroActions();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -60,7 +57,7 @@ export function HeroActionsMenu({
                 type="button"
                 aria-label="Excluir"
                 onClick={() => {
-                  onDelete?.();
+                  openDelete(hero);
                   setIsOpen(false);
                 }}
                 className="text-red-600 hover:text-red-700"
@@ -71,7 +68,7 @@ export function HeroActionsMenu({
                 type="button"
                 aria-label="Editar"
                 onClick={() => {
-                  onEdit?.();
+                  openEdit(hero);
                   setIsOpen(false);
                 }}
                 className="text-indigo-600 hover:text-indigo-700"
@@ -82,7 +79,7 @@ export function HeroActionsMenu({
                 checked={true}
                 label="Desativar héroi"
                 onChange={() => {
-                  onDelete?.();
+                  openDelete(hero);
                   setIsOpen(false);
                 }}
               />
@@ -92,7 +89,7 @@ export function HeroActionsMenu({
               checked={false}
               label="Ativar herói"
               onChange={() => {
-                onToggleActive?.();
+                openActivate(hero);
                 setIsOpen(false);
               }}
             />
