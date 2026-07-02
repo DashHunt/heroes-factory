@@ -20,7 +20,7 @@ Este README cobre **como rodar o projeto**, **o que foi construído**, **por que
 
 ## Visão geral
 
-**Hero Factory** é uma plataforma de gestão de heróis: criar, listar (com paginação e busca), editar, "excluir" (soft delete) e reativar. O contrato de API, as regras de negócio e o fluxo esperado de tela estão detalhados em `DOCUMENTATION.md`.
+**Hero Factory** é uma plataforma de gestão de heróis: criar, listar (com paginação e busca), editar, "excluir" (soft delete) e reativar.
 
 O projeto é dividido em duas aplicações independentes, cada uma com seu próprio `package.json`:
 
