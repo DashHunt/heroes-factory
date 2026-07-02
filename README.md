@@ -84,7 +84,7 @@ npm run test
 
 ### De onde veio, e por que mudou
 
-O backend passou por duas fases de design, ambas documentadas no repositório (`backend-architeture.md` e `backend-evolution-spec.md`): a primeira propunha camadas explícitas (`domain/` + `application/` + `infrastructure/`, com uma entidade `Hero`, um `HeroRepository` e seis classes de use-case). Na prática, ao comparar esse desenho outras opções e possibilidades ficou claro que aquilo era mais cerimônia do que o escopo (uma única entidade).
+O backend passou por duas fases de design: a primeira propunha camadas e domínios explícitos (`domain/` + `application/` + `infrastructure/`, com uma entidade `Hero`, um `HeroRepository` e seis classes de use-case). Na prática, ao comparar esse desenho outras opções e possibilidades ficou claro que aquilo era mais cerimônia do que o escopo (uma única entidade).
 
 O resultado final é **feature-first e propositalmente enxuto, mas escalável verticalmente**: tudo relacionado a herói mora em `features/hero/`, a camada é sinalizada pelo **sufixo do nome do arquivo** (módulos), não por uma árvore de pastas, e a lógica de negócio/acesso a dado viram **funções**.
 
